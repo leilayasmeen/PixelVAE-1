@@ -14,7 +14,7 @@ def int_shape(x):
 def concat_elu(x):
     """ like concatenated ReLU (http://arxiv.org/abs/1603.05201), but then with ELU """
     axis = len(x.get_shape())-1
-    return tf.nn.elu(tf.concat(axis, [x, -x]))
+    return tf.nn.elu(tf.concat([x, -x], axis))
 
 def log_sum_exp(x):
     """ numerically stable log_sum_exp implementation that prevents overflow """
@@ -42,7 +42,7 @@ def discretized_mix_logistic_loss(x,l,sum_all=True):
     x = tf.reshape(x, xs + [1]) + tf.zeros(xs + [nr_mix]) # here and below: getting the means and adjusting them based on preceding sub-pixels
     m2 = tf.reshape(means[:,:,:,1,:] + coeffs[:, :, :, 0, :] * x[:, :, :, 0, :], [xs[0],xs[1],xs[2],1,nr_mix])
     m3 = tf.reshape(means[:, :, :, 2, :] + coeffs[:, :, :, 1, :] * x[:, :, :, 0, :] + coeffs[:, :, :, 2, :] * x[:, :, :, 1, :], [xs[0],xs[1],xs[2],1,nr_mix])
-    means = tf.concat(3,[tf.reshape(means[:,:,:,0,:], [xs[0],xs[1],xs[2],1,nr_mix]), m2, m3])
+    means = tf.concat([tf.reshape(means[:,:,:,0,:], [xs[0],xs[1],xs[2],1,nr_mix]), m2, m3], 3)
     centered_x = x - means
     inv_stdv = tf.exp(-log_scales)
     plus_in = inv_stdv * (centered_x + 1./255.)
